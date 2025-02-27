@@ -1,14 +1,30 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const Order = require("./Order");
-const Product = require("./Product");
 
 const OrderItem = sequelize.define("OrderItem", {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  quantity: { type: DataTypes.INTEGER, allowNull: false },
+  id: { 
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  orderId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  productId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  quantity: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    defaultValue: 1
+  },
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    defaultValue: 0
+  }
 });
-
-OrderItem.belongsTo(Order);
-OrderItem.belongsTo(Product);
 
 module.exports = OrderItem;

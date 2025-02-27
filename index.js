@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const routes = require('./routes'); // Import routes
+const routes = require('./src/routes'); // Import routes from correct path
 
 dotenv.config();
 
@@ -9,16 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-console.log('Routes type:', typeof routes);
-console.log('Is routes a function?', typeof routes === 'function');
-app.get('/api/test', (req, res) => {
+// Test route
+app.get('/test', (req, res) => {
     res.json({ message: 'API is working!' });
-  });
+});
 
-if (typeof routes === 'function') {
-  app.use('/api/', routes); // Add routes only if it's a function
-} else {
-  console.error('Routes is not a middleware function!');
-}
+// Mount all routes at /api
+app.use('/api', routes);
 
 module.exports = app;

@@ -1,11 +1,8 @@
 const express = require('express');
 const { body, param } = require('express-validator');
-const { User, Product, Order, Payment } = require('../models');
-const validate = require('../middlewares/validationMiddleware');
-const authMiddleware = require('../middlewares/authMiddleware');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-
+const { Order, OrderItem, Product } = require('../models');
+const validate = require('../middleware/validationMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const orderRouter = express.Router();
 
@@ -20,9 +17,37 @@ orderRouter.get('/:id', authMiddleware, async (req, res) => {
   res.json(order);
 });
 
-orderRouter.post('/', authMiddleware, async (req, res) => {
-  const order = await Order.create(req.body);
-  res.status(201).json(order);
+orderRouter.post('/', authMiddleware, validate([
+  body('userId').notEmpty().withMessage('User ID is required'),
+  body('items').isArray().withMessage('Items must be an array'),
+]), async (req, res) => {
+  try {
+    const { userId, items } = req.body;
+    const order = await Order.create({ userId, total: 0 });
+
+    let total = 0;
+    for (const item of items) {
+      const product = await Product.findByPk(item.productId);
+      if (!product) {
+        return res.status(404).json({ message: `Product not found: ${item.productId}` });
+      }
+      
+      const orderItem = await OrderItem.create({
+        orderId: order.id,
+        productId: item.productId,
+        quantity: item.quantity
+      });
+      
+      total += orderItem.quantity * product.price;
+    }
+
+    order.total = total;
+    await order.save();
+    res.status(201).json(order);
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ message: 'Error creating order', error: error.message });
+  }
 });
 
 orderRouter.put('/:id', authMiddleware, async (req, res) => {
@@ -40,4 +65,3 @@ orderRouter.delete('/:id', authMiddleware, async (req, res) => {
 });
 
 module.exports = orderRouter;
-// backend/src/routes/authRoutes.js
