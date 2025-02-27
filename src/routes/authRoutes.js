@@ -1,8 +1,8 @@
 const express = require('express');
 const { body, param } = require('express-validator');
 const { User, Product, Order, Payment } = require('../models');
-const validate = require('../middlewares/validationMiddleware');
-const authMiddleware = require('../middlewares/authMiddleware');
+const validate = require('../middleware/validationMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
